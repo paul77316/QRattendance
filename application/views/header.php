@@ -34,7 +34,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 
-   <<!-- script src="<?=  base_url('assets/jquery-ui/jquery-ui.js');?> "></script>  -->
+   <!-- script src="<?=  base_url('assets/jquery-ui/jquery-ui.js');?> "></script>  -->
    <!--  <script src="<?=  base_url('assets/vendor/bootstrap/js/bootstrap.bundle.min.js');?> "></script> -->
     <!-- <script src="<?=  base_url('assets/bootstrap/bootstrap.bundle.min.js');?> "></script> -->
   <!--   <script src="<?=  base_url('assets/bootstrap/jquery.slim.min.js');?> "></script> -->
