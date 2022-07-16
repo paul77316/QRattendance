@@ -280,7 +280,7 @@ class main extends CI_Controller {
 	        }
         
         // Get rows
-        $data['members'] = $this->main_model->getRowsImport();
+        $data['members'] = $this->main_model->getRows();
 			$this->load->view('header');
 			$this->load->view('upload_student',$data);
 			$this->load->view('footer');
@@ -417,6 +417,15 @@ class main extends CI_Controller {
             return false;
            }
         }
+
+        /***********************/
+        /* CLASSES RELATED 	*/
+
+        public function classes(){
+			$this->load->view('header');
+			$this->load->view('classes');
+			$this->load->view('footer');
+		}
         
 
 }

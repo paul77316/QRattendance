@@ -180,7 +180,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities"
                     data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item" href="utilities-color.html">Classes</a>
+                        <a class="collapse-item" href="<?= base_url('main/classes');?>">Classes</a>
                         <a class="collapse-item" href="<?= base_url('main/subjects');?>">Subjects</a>
                         <a class="collapse-item" href="<?= base_url('main/section_yr_lvl');?>">Grade Level</a>
                         <div class="collapse-divider"></div>
