@@ -164,7 +164,7 @@ $(document).ready(function() {
 		// 	}
 		// });
 		 $("#section_name").autocomplete({
-	        source: "<?php echo base_url('main/autocompleteData'); ?>",
+	        source: "<?php echo base_url('main/autocompleteData?module=section'); ?>",
 	        select: function( event, ui ) {
 	            event.preventDefault();
 	            $("#section_name").val(ui.item.value);

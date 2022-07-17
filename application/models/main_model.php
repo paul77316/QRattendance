@@ -2,17 +2,24 @@
 class main_model extends CI_Model
 {
 	public $Modal;
+//section year level
 	var $table = "section_year_lvl";
 	// var $table = "subjects";
 	var $where = "deleted_at = '0'";
 	var $select_column = array("id", "year_level", "section_name", "deleted_at");    
 	var $order_column = array(null, "year_level", "section_name", null, null);
 
+//subjects
 	var $table2 = "subjects";
 	var $where2 = "subjects.deleted_at = '0'";
 	var $select_column2 = array("subjects.id as sbj_id","section_year_lvl.id as syl_id", "section_year_lvl.year_level","section_year_lvl.section_name", "subjects.subject_name as subject_name", "subjects.status as status","subjects.deleted_at as sbj_deleted");    
 	var $order_column2 = array(null, "year_level", "section_name", null, null);  
 
+//classess
+	var $table3 = "subjects";
+	var $where3 = "subjects.deleted_at = '0'";
+	var $select_column3 = array("subjects.id as sbj_id","section_year_lvl.id as syl_id", "section_year_lvl.year_level","section_year_lvl.section_name", "subjects.subject_name as subject_name", "subjects.status as status","subjects.deleted_at as sbj_deleted");    
+	var $order_column3 = array(null, "year_level", "section_name", null, null);  
 
 
 
@@ -67,6 +74,28 @@ class main_model extends CI_Model
 		   } 
 
 	 	}
+	 	elseif($module == "classes")
+	 	{
+	 		$this->db->select($this->select_column2);
+			$this->db->from($this->table2);
+			$this->db->join('section_year_lvl', 'section_year_lvl.id = subjects.section_year_lvl_id', 'left');
+			$this->db->where($this->where2);
+		   if(isset($_POST["search"]["value"]))  
+		   {  
+				$this->db->like("year_level", $_POST["search"]["value"]);  
+				$this->db->or_like("section_name", $_POST["search"]["value"]);  
+		   }  
+		   if(isset($_POST["order"]))  
+		   {  
+				$this->db->order_by($this->order_column2[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);  
+		   }  
+		   else  
+		   {  
+				$this->db->order_by('sbj_id', 'DESC');
+
+		   } 
+
+	 	}
 
 	 
 	 }
@@ -99,11 +128,13 @@ class main_model extends CI_Model
 		 //   $this->db->limit(5);
 		 // return $this->db->get('section_year_lvl')->result();
 	  // } 
-	  function getRows($params = array()){
-        $this->db->select("*");
-        $this->db->where("deleted_at='0'");
-        $this->db->from("section_year_lvl");
-        
+	  function getRows($params = array(),$db,$field){
+       
+
+        	$this->db->select("*");
+	        $this->db->where("deleted_at='0'");
+	        $this->db->from($db);	
+    
         //fetch data by conditions
         if(array_key_exists("conditions",$params)){
             foreach ($params['conditions'] as $key => $value) {
@@ -113,10 +144,10 @@ class main_model extends CI_Model
         
         //search by terms
         if(!empty($params['searchTerm'])){
-            $this->db->like('section_name', $params['searchTerm']);
+            $this->db->like($field, $params['searchTerm']);
         }
         
-        $this->db->order_by('section_name', 'asc');
+        $this->db->order_by($field, 'asc');
         
         if(array_key_exists("id",$params)){
             $this->db->where('id',$params['id']);

@@ -111,22 +111,53 @@ class main extends CI_Controller {
 		// }
 		public function autocompleteData() {
 		$returnData = array();
-		
+		$db="";
+		$field="";
+		$module = $this->input->get('module');
+		if($module == 'section'){	
+			$db = "section_year_lvl";
+			$field ="section_name";
+		}
+
+		else if($module == 'sbj'){	
+			$db = "subjects";
+			$field ="subject_name";
+		}
+
+
 		// Get skills data
 		$conditions['searchTerm'] = $this->input->get('term');
-		$skillData = $this->main_model->getRows($conditions);
+		$skillData = $this->main_model->getRows($conditions,$db,$field);
 		
 		// Generate array
+	
 		if(!empty($skillData)){
 			foreach ($skillData as $row){
 				$data['id'] = $row['id'];
-				$data['value'] = $row['section_name']."|".$row['year_level'];
+				if($module == 'section'){
+					$data['value'] = $row['section_name']."|".$row['year_level'];
+				}
+				elseif($module == 'sbj'){
+					$data['value'] = $row['subject_name'];
+				}
 				array_push($returnData, $data);
 			}
 		}
 		
+		// else if($module == 'sbj'){
+		// 	if(!empty($skillData)){
+		// 		foreach ($skillData as $row){
+		// 			$data['id'] = $row['id'];
+		// 			$data['value'] = $row['subject_name'];
+		// 			array_push($returnData, $data);
+		// 		}
+		// 	}
+
+		// }
+
+		
 		// Return results as json encoded array
-		echo json_encode($returnData);die;
+		echo json_encode($returnData);
 	}
 		/******************************* */
 		/*	SECTION YR LEVEL			*/
@@ -146,6 +177,24 @@ class main extends CI_Controller {
 					  'created_at'=> date('Y-m-d'),
 					);  
  
+			$insert = $this->main_model->insert_data($db,$insert_data); 
+			echo json_encode($insert);
+	   }
+	   public function add_class()
+	   {
+		 $db ="classes";  
+		 $insert_data = array(  
+			  'class_name'=>$this->input->post('class_name'),  
+			  'start_time'=> $this->input->post("class_start_time"),
+			  'end_time'=> $this->input->post("class_end_time"),
+			  'subject_id'=> $this->input->post("class_subject_id"),
+			  'teacher_id'=> $this->input->post("class_teacher"),
+			  'section_year_lvl_id'=> $this->input->post("class_yr_lvl_id"),
+			  'school_year'=> $this->input->post("class_school_yr"),
+			  'created_by'=> $this->input->post("created_by"),
+			  'created_at'=> date('Y-m-d'),
+			);  
+
 			$insert = $this->main_model->insert_data($db,$insert_data); 
 			echo json_encode($insert);
 	   }
@@ -225,7 +274,38 @@ class main extends CI_Controller {
 		   ); 
 		   $this->session->set_userdata('sd', $data); 
 		   echo json_encode($output);  
-		}  
+		}
+
+		function fetch_user3()
+	   {   
+	   	   $module="classes";
+		   $fetch_data = $this->main_model->make_datatables($module);  
+		   $data = array();
+		   $base_url = "";
+		   $style="";  
+		   foreach($fetch_data as $row)  
+		   {  
+				if($row->sbj_deleted == '0'){
+				$sub_array = array();
+				$sub_array[] = $row->sbj_id;  
+				$sub_array[] = $row->subject_name;  
+				$sub_array[] = $row->year_level;
+				$sub_array[] = $row->section_name;
+				$sub_array[] = $row->status." ". "<i class='fas fa-circle' style='".$style."'></i>";
+				$sub_array[] = '<a href="view_subject?id='.$row->sbj_id.' "><button type="button" name="update" id="'.$row->sbj_id.'" class="btn btn-primary btn-sm update">View</button></a>';
+				$data[] = $sub_array;
+				}
+		   
+		   }
+		   $output = array(  
+				"draw"  => intval($_POST["draw"]),  
+				"recordsTotal"  =>  $this->main_model->get_all_data($module),  
+				"recordsFiltered" => $this->main_model->get_filtered_data($module),  
+				"data" =>   $data  
+		   ); 
+		   $this->session->set_userdata('sd', $data); 
+		   echo json_encode($output);  
+		}   
 		function edit_records()
 		{
 		 	$id = $this->input->post('id');

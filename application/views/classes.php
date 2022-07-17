@@ -15,10 +15,13 @@
 				<tr>
 					<!-- <th>ID</th> -->
 					<th>ID</th>
-					<th>Subject Name</th>
-					<th>Year Level</th>
-					<th>Section</th>
-					<th>Status</th>
+					<th>Class Name</th>
+					<th>Start time</th>
+					<th>End time</th>
+					<th>Subject</th>
+					<th>Teacher</th>
+					<th>Section/Grade</th>
+					<th>School Year</th>
 					<th class="">Action</th>
 				</tr>
 			</thead>
@@ -36,34 +39,36 @@
 				</button>
 			</div>
 			<div class="modal-body">
-			<form id="frm_add_section" action="post">
+			<form id="frm_add_class" action="post">
 				<div class="form-group">
 					<label for="formGroupExampleInput">Class Name</label>
 					<input type="text" class="form-control" name="class_name" id="formGroupExampleInput2" placeholder="" required>
 			    </div>
 				<div class="form-group">
 					<label for="formGroupExampleInput2">Start time</label>
-					<input type="date" class="form-control" name="class_start_time">
+					<input type="time" class="form-control" name="class_start_time" required>
 				</div>
 				<div class="form-group">
 					<label for="formGroupExampleInput2">End time</label>
-					<input type="date" class="form-control" name="class_end_time">
+					<input type="time" class="form-control" name="class_end_time" required>
 				</div>
 				<div class="form-group">
 					<label for="formGroupExampleInput2">Subject</label>
-					<input type="text" class="form-control" name="class_end_time">
+					<input type="text" class="form-control" id="class_subject" placeholder="select from existing records" required>
+					<input type="hidden" name="class_subject_id" value="0">
 				</div>
 				<div class="form-group">
 					<label for="formGroupExampleInput2">Teacher</label>
-					<input type="text" class="form-control" name="class_end_time">
+					<input type="text" class="form-control" name="class_teacher" required>
 				</div>
 				<div class="form-group">
-					<label for="formGroupExampleInput2">Year Level/Section</label>
-					<input type="text" class="form-control" name="class_end_time">
+					<label for="formGroupExampleInput2">Section/Year Level</label>
+					<input type="text" class="form-control" id="class_yr_lvl"  placeholder="select from existing records" required>
+					<input type="hidden" name="class_yr_lvl_id" value="0">
 				</div>
 				<div class="form-group">
 					<label for="formGroupExampleInput2">School Year</label>
-					<input type="text" class="form-control" name="class_end_time">
+					<input type="text" class="form-control" name="class_school_yr" required>
 				</div>
 
 
@@ -96,10 +101,10 @@ $(document).ready(function() {
         });
       
         //section year add ajax
-	    $("#frm_add_section").on('submit', function(e) {
+	    $("#frm_add_class").on('submit', function(e) {
 	        e.preventDefault();
 	        $.ajax({
-	            url: "<?= base_url('main/add_subject');?>",
+	            url: "<?= base_url('main/add_class');?>",
 	            type: "POST",
 	            data: $("#frm_add_section").serialize(),
 	            dataType: "JSON",
@@ -183,20 +188,42 @@ $(document).ready(function() {
 		// 	}
 		// 	}
 		// });
-		 $("#section_name").autocomplete({
-	        source: "<?php echo base_url('main/autocompleteData'); ?>",
+		 $("#class_subject").autocomplete({
+	        source: "<?php echo base_url('main/autocompleteData?module=sbj'); ?>",
 	        select: function( event, ui ) {
 	            event.preventDefault();
-	            $("#section_name").val(ui.item.value);
-	            $("input[name=section_yr_id]").val(ui.item.id);
+	            $("#class_subject").val(ui.item.value);
+	            $("input[name=class_subject_id]").val(ui.item.id);
 	            $("#save-btn").prop( "disabled", false );
        		 },
        		change: function (e, ui) {
 				if(!ui.item)
 				{
-					$('input[name=section_yr_id]').val(0);
+					$('input[name=class_subject_id]').val(0);
 
-					if($("input[name=section_yr_id]").val() == 0){
+					if($("input[name=class_subject_id]").val() == 0){
+	        			$("#save-btn").prop( "disabled", true );
+	        		}else{
+	        			$("#save-btn").prop( "disabled", false );
+	        		}
+					console.log(ui.value);
+				}
+			}
+    	});
+		$("#class_yr_lvl").autocomplete({
+	        source: "<?php echo base_url('main/autocompleteData?module=section'); ?>",
+	        select: function( event, ui ) {
+	            event.preventDefault();
+	            $("#class_yr_lvl").val(ui.item.value);
+	            $("input[name=class_yr_lvl_id]").val(ui.item.id);
+	            $("#save-btn").prop( "disabled", false );
+       		 },
+       		change: function (e, ui) {
+				if(!ui.item)
+				{
+					$('input[name=class_yr_lvl_id]').val(0);
+
+					if($("input[name=class_yr_lvl_id]").val() == 0){
 	        			$("#save-btn").prop( "disabled", true );
 	        		}else{
 	        			$("#save-btn").prop( "disabled", false );
