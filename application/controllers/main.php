@@ -1,5 +1,8 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+require 'vendor/autoload.php';
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class main extends CI_Controller {
 
@@ -285,14 +288,15 @@ class main extends CI_Controller {
 		   $style="";  
 		   foreach($fetch_data as $row)  
 		   {  
-				if($row->sbj_deleted == '0'){
+				if($row->cl_deleted == '0'){
 				$sub_array = array();
-				$sub_array[] = $row->sbj_id;  
-				$sub_array[] = $row->subject_name;  
-				$sub_array[] = $row->year_level;
+				$sub_array[] = $row->id;  
+				$sub_array[] = $row->class_name;  
+				$sub_array[] = $row->start_time;
+				$sub_array[] = $row->end_time;
 				$sub_array[] = $row->section_name;
-				$sub_array[] = $row->status." ". "<i class='fas fa-circle' style='".$style."'></i>";
-				$sub_array[] = '<a href="view_subject?id='.$row->sbj_id.' "><button type="button" name="update" id="'.$row->sbj_id.'" class="btn btn-primary btn-sm update">View</button></a>';
+				$sub_array[] = $row->teacher_name;
+				// $sub_array[] = '<a href="view_subject?id='.$row->sbj_id.' "><button type="button" name="update" id="'.$row->sbj_id.'" class="btn btn-primary btn-sm update">View</button></a>';
 				$data[] = $sub_array;
 				}
 		   
@@ -337,6 +341,19 @@ class main extends CI_Controller {
 			$this->main_model->update_subject_status($data,$id);
 			echo json_encode($id);    
 		}
+		function endClass()
+		{
+		date_default_timezone_set("Asia/Manila");
+		 $timeout = date('g:i a');
+		 $classid = $this->input->post('class');
+		 $date = $this->input->post('datenow');
+
+		 $data = array (
+			 'out' => $timeout
+			);
+			$this->main_model->update_class_timeout($data,$classid,$date);
+			echo json_encode($data);    
+		}
 	   function view_section_yr_lvl(){
 			
 			$this->load->view('header');
@@ -345,6 +362,15 @@ class main extends CI_Controller {
 		   
 		   // echo json_encode($output);
 	  }
+	   function view_attendance(){
+	  		$aa = $_GET['classid'];
+			
+			$this->load->view('header');
+			$this->load->view('view_attendance',$aa);
+			$this->load->view('footer');
+	  }
+
+
 
 	  function upload_student(){
 		$data = array();
@@ -360,7 +386,7 @@ class main extends CI_Controller {
 	        }
         
         // Get rows
-        $data['members'] = $this->main_model->getRows();
+        // $data['members'] = $this->main_model->getRows();
 			$this->load->view('header');
 			$this->load->view('upload_student',$data);
 			$this->load->view('footer');
@@ -506,6 +532,78 @@ class main extends CI_Controller {
 			$this->load->view('classes');
 			$this->load->view('footer');
 		}
-        
+		/******************************* */
+		/*	CHECK ATTENDANCE			*/
+		/****************************** */
+		public function check_attendance(){
+			$this->load->view('header');
+			$this->load->view('check_attendance');
+			$this->load->view('footer');
+
+		}
+        public function add_attendance_log(){
+        	date_default_timezone_set("Asia/Manila");
+			$db ="attandance_logs";
+			$db2 ="students";  
+			$check = new main_model();
+			$studentID = $this->input->post('student_id');
+			$checking = $check->checkStudentID($studentID, $db2);
+
+			if ( $this->input->post("class") == '') {
+				$msg = "Class is required. Please Select a Class";
+			}
+			elseif(count($checking) == 0){
+				$msg = "Student Number Not Found";
+				
+			}
+			else{
+				$date = $this->input->post('datenow');
+				$in = date('g:i a');
+				$classid = $this->input->post("class");
+				$studentID = $this->input->post("student_id");
+
+				$checkduplicate = $this->main_model->checkDuplicteLogs($date,$classid,$studentID,$in);
+
+				if(count($checkduplicate) == 0){
+					$insert_data = array(  
+					  'date'=>$this->input->post('datenow'),  
+					  'in'=> date('g:i a'),
+					  'class_id'=> $this->input->post("class"),
+					  'student_id'=>$this->input->post("student_id")
+					);
+					$insert = $this->main_model->insert_data($db,$insert_data);   
+				}
+
+			}
+			// $insert = $this->main_model->insert_data($db,$insert_data); 
+			echo json_encode($msg);
+	   }
+	  function createExcel() {
+	  	$classid = $_GET['classid'];
+		$fileName = 'attendance.xlsx';  
+		$Data = $this->main_model->attendanceList($classid);   
+		$spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+       	$sheet->setCellValue('A1', 'Student ID');
+        $sheet->setCellValue('B1', 'Last Name');
+        $sheet->setCellValue('C1', 'First Name');
+        $sheet->setCellValue('D1', 'Middle Name');
+		$sheet->setCellValue('E1', 'Date');
+        $sheet->setCellValue('F1', 'Time In');    
+        $rows = 2;
+        foreach ($Data as $val){
+            $sheet->setCellValue('A' . $rows, $val['student_id']);
+            $sheet->setCellValue('B' . $rows, $val['lastname']);
+            $sheet->setCellValue('C' . $rows, $val['firstname']);
+            $sheet->setCellValue('D' . $rows, $val['middlename']);
+	    	$sheet->setCellValue('E' . $rows, $val['date']);
+            $sheet->setCellValue('F' . $rows, $val['in']);
+            $rows++;
+        } 
+        $writer = new Xlsx($spreadsheet);
+		$writer->save("upload/".$fileName);
+		header("Content-Type: application/vnd.ms-excel");
+        redirect(base_url()."/upload/".$fileName);              
+    }  
 
 }

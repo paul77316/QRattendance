@@ -16,9 +16,9 @@ class main_model extends CI_Model
 	var $order_column2 = array(null, "year_level", "section_name", null, null);  
 
 //classess
-	var $table3 = "subjects";
-	var $where3 = "subjects.deleted_at = '0'";
-	var $select_column3 = array("subjects.id as sbj_id","section_year_lvl.id as syl_id", "section_year_lvl.year_level","section_year_lvl.section_name", "subjects.subject_name as subject_name", "subjects.status as status","subjects.deleted_at as sbj_deleted");    
+	var $table3 = "classes";
+	var $where3 = "classes.deleted_at = '0'";
+	var $select_column3 = array("classes.*","subjects.id as sbj_id","section_year_lvl.id as syl_id", "section_year_lvl.year_level","section_year_lvl.section_name", "subjects.subject_name as subject_name", "classes.deleted_at as cl_deleted", "CONCAT(users.firstname,' ', users.lastname) as teacher_name");    
 	var $order_column3 = array(null, "year_level", "section_name", null, null);  
 
 
@@ -76,10 +76,12 @@ class main_model extends CI_Model
 	 	}
 	 	elseif($module == "classes")
 	 	{
-	 		$this->db->select($this->select_column2);
-			$this->db->from($this->table2);
-			$this->db->join('section_year_lvl', 'section_year_lvl.id = subjects.section_year_lvl_id', 'left');
-			$this->db->where($this->where2);
+	 		$this->db->select($this->select_column3);
+			$this->db->from($this->table3);
+			$this->db->join('section_year_lvl', 'classes.section_year_lvl_id = section_year_lvl.id', 'left');
+			$this->db->join('users', 'classes.teacher_id = users.id', 'left');
+			$this->db->join('subjects', 'classes.subject_id = subjects.id', 'left');
+			$this->db->where($this->where3);
 		   if(isset($_POST["search"]["value"]))  
 		   {  
 				$this->db->like("year_level", $_POST["search"]["value"]);  
@@ -129,8 +131,6 @@ class main_model extends CI_Model
 		 // return $this->db->get('section_year_lvl')->result();
 	  // } 
 	  function getRows($params = array(),$db,$field){
-       
-
         	$this->db->select("*");
 	        $this->db->where("deleted_at='0'");
 	        $this->db->from($db);	
@@ -172,6 +172,10 @@ class main_model extends CI_Model
 			 $this->db->where($this->where2);
 	   		$this->db->from($this->table2);
 	   }
+	    elseif($module == "classes"){
+			 $this->db->where($this->where3);
+	   		$this->db->from($this->table3);
+	   }
 	 
 	   return $this->db->count_all_results();  
 	}  
@@ -194,11 +198,35 @@ class main_model extends CI_Model
 	   elseif($module == 'sbj'){
 	   	   $this->db->where($this->where2); 
 	   }
+	   elseif($module == 'clasess'){
+	   	   $this->db->where($this->where3); 
+	   }
+	 
+	 
+	   $query = $this->db->get();
+
+	   return $query->num_rows();  
+	 } 
+
+	 function check($module){  
+	   $this->make_query($module);
+	   if($module == 'syl')
+	   {
+	   	   $this->db->where($this->where); 
+	   }
+	   elseif($module == 'sbj'){
+	   	   $this->db->where($this->where2); 
+	   }
+	   elseif($module == 'clasess'){
+	   	   $this->db->where($this->where3); 
+	   }
+	 
 	 
 	   $query = $this->db->get();
 
 	   return $query->num_rows();  
 	 }   
+  
 
 	/*function to use fetch the data from users table*/
 	function validate($user, $pass)
@@ -271,6 +299,13 @@ class main_model extends CI_Model
 		$this->db->where('id', $id);
 		$this->db->update('subjects', $data);
 	}
+	function update_class_timeout($data,$classid,$date)
+	{
+		$this->db->where('class_id', $classid);
+		$this->db->where('date', $date);
+		$this->db->update('attandance_logs', $data);
+	}
+
 
 	 function getRowsImport($params = array())
 	 {
@@ -349,7 +384,52 @@ class main_model extends CI_Model
         }
         return false;
     }
-    
+    //check student ID while scaning
+   function checkStudentID($studentID, $db)
+	{
+		$this->db->select('*');
+		$this->db->from($db);
+		$this->db->where('student_id', $studentID);
+		$query = $this->db->get();
+		$res = $query->result();
+		return $res;
+	}
+	//check student ID while scaning
+   function checkDuplicteLogs($date,$classid,$studentID,$in)
+	{
+		$this->db->select('*');
+		$this->db->from('attandance_logs');
+		$this->db->where('student_id', $studentID);
+		$this->db->where('date', $date);
+		$this->db->where('class_id', $classid);
+		$this->db->where('in', $in);	
+		$query = $this->db->get();
+		$res = $query->result();
+		return $res;
+	}
+	function attendanceList($classid) {
+		$datenow = date('Y-m-d', strtotime("now"));
+		$this->db->select(array('students.student_id', 'students.lastname', 'students.firstname', 'students.middlename', 'attandance_logs.date',
+			'attandance_logs.in','attandance_logs.out','classes.class_name'));
+		$this->db->from('attandance_logs');
+		$this->db->join('students', 'attandance_logs.student_id = students.student_id', 'left');
+		$this->db->join('section_year_lvl', 'students.section_year_lvl_id = section_year_lvl.id', 'left');
+		$this->db->join('classes', 'attandance_logs.class_id = classes.id', 'left');
+		$this->db->where('class_id', $classid);
+		$this->db->where('date', $datenow);
+		$query = $this->db->get();
+		return $query->result_array();
+	}
+	//get class name
+   function className($classId)
+	{
+		$this->db->select('*');
+		$this->db->from("classes");
+		$this->db->where('student_id', $classId);
+		$query = $this->db->get();
+		$res = $query->result();
+		return $res;
+	}
 
 }
 ?>

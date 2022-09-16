@@ -42,6 +42,26 @@
 			</div>
 		</div>
 	</div>
+	<!-- END CLASS MODAL -->
+		<div class="modal fade" id="confirm-modal" tabindex="-1" aria-labelledby="exampleModalLabel1" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header btn-danger">
+						<h5 class="modal-title" id="exampleModalLabel1">Confirmation</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<h6>Are you sure you want to end this session?</h6>
+					</div>
+					<div class="modal-footer">
+						<button class="btn btn-primary" data-dismiss="modal">No</button>
+						<button class="btn btn-danger" id="end-class"> Yes</button>
+					</div>
+				</div>
+			</div>
+		</div>
 </body>
 <script type="text/javascript">
 	     $(".close").on( "click", function() {

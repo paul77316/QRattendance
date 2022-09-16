@@ -57,7 +57,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <!-- Page level custom scripts -->
  <!--    <script src="<?=  base_url('assets/js/demo/chart-area-demo.js');?> "></script>
     <script src="<?=  base_url('assets/js/demo/chart-pie-demo.js');?>"></script> -->
-
+  <script src="<?=  base_url('assets/qrcodeScanner/ht.js');?> "></script>
 <style>
 .ui-autocomplete-input {
   font-size: 16px;
@@ -164,7 +164,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 </a>
                 <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item" href="buttons.html">Check Attendance</a>
+                        <a class="collapse-item" href="<?= base_url('main/check_attendance');?>">Check Attendance</a>
                         <a class="collapse-item" href="cards.html">Generate QR Code</a>
                     </div>
                 </div>

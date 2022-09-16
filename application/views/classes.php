@@ -20,9 +20,9 @@
 					<th>End time</th>
 					<th>Subject</th>
 					<th>Teacher</th>
-					<th>Section/Grade</th>
+					<!-- <th>Section/Grade</th>
 					<th>School Year</th>
-					<th class="">Action</th>
+					<th class="">Action</th> -->
 				</tr>
 			</thead>
 		</table>
@@ -59,7 +59,21 @@
 				</div>
 				<div class="form-group">
 					<label for="formGroupExampleInput2">Teacher</label>
-					<input type="text" class="form-control" name="class_teacher" required>
+					<select class="form-control" name="class_teacher">
+						<?php
+							$tble = "users"; 
+							$data = $this->main_model->fetchAllData($tble);  
+						   foreach($data as $row)  
+						   {  
+						   	 	$selected = ($_SESSION['login']['id'] == $row->id ) ? "selected" : "";
+						   		if($row->deleted_at == 0){
+						   			echo "<option value='".$row->id."' ".$selected." > ".$row->lastname.",".$row->firstname."</option>";
+						   		}
+								
+						   }
+						?>
+
+					</select>
 				</div>
 				<div class="form-group">
 					<label for="formGroupExampleInput2">Section/Year Level</label>
@@ -69,6 +83,7 @@
 				<div class="form-group">
 					<label for="formGroupExampleInput2">School Year</label>
 					<input type="text" class="form-control" name="class_school_yr" required>
+					<input type="hidden" class="form-control" name="created_by" value="<?=  $_SESSION['login']['id']?>">
 				</div>
 
 
@@ -106,7 +121,7 @@ $(document).ready(function() {
 	        $.ajax({
 	            url: "<?= base_url('main/add_class');?>",
 	            type: "POST",
-	            data: $("#frm_add_section").serialize(),
+	            data: $("#frm_add_class").serialize(),
 	            dataType: "JSON",
 	            beforeSend: function() {
 	                
@@ -127,7 +142,7 @@ $(document).ready(function() {
 	       "serverSide":true,  
 	       "order":[],  
 	       "ajax":{  
-	            url:"<?= base_url('main/fetch_user2'); ?>",  
+	            url:"<?= base_url('main/fetch_user3'); ?>",  
 	            type:"POST"  
 	       },  
 	       "columnDefs":[  
