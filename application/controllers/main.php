@@ -580,6 +580,7 @@ class main extends CI_Controller {
 	   }
 	  function createExcel() {
 	  	$classid = $_GET['classid'];
+	  	
 		$fileName = 'attendance.xlsx';  
 		$Data = $this->main_model->attendanceList($classid);   
 		$spreadsheet = new Spreadsheet();
